@@ -15,7 +15,7 @@ export default defineComponent({
 </script>
 
 <style lang="scss">
-@import '../../../node_modules/tui-grid/dist/tui-grid.css';
+@import '../../../node_modules/@seoulventures/sv-dt/dist/svDataTable.css';
 html {
   font-size: 14px;
 }

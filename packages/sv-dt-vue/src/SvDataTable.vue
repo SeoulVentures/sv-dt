@@ -12,7 +12,8 @@ export default defineComponent({
     props: {
         queryId: {
             type: Number,
-            required: true
+            required: true,
+            default: 0
         },
         scrollX: {
             type: Boolean,
@@ -96,7 +97,6 @@ export default defineComponent({
                 }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {} as typeof state.filters);
                 if(!filters) return;
                 if(JSON.stringify(state.filters) === JSON.stringify(filters)) return;
-                // state.filters = Object.assign(state.filters, filters);
                 state.filters = filters;
 
                 state.gridInstance!.resetData([]);
@@ -107,7 +107,6 @@ export default defineComponent({
                     filterLayerState.activeFilterState = null;
                     filterLayerState.activeColumnAddress = null;
                     data.filters = null;
-                    // state.gridInstance!.dispatch('resetFilterState'); // Undocumented method
                     state.gridInstance!.readData(1);
                 }));
                 document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
