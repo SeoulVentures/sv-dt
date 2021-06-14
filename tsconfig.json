@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "target": "esnext",
+        "module": "esnext",
+        "strict": true,
+        "jsx": "preserve",
+        "importHelpers": false,
+        "moduleResolution": "node",
+        "skipLibCheck": true,
+        "esModuleInterop": false,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": false,
+        "baseUrl": ".",
+        "lib": [
+            "esnext",
+            "dom",
+            "dom.iterable",
+            "scripthost"
+        ],
+        "typeRoots": [
+            "./node_modules/@types",
+            "resources/js/typings"
+        ],
+        "paths": {
+            // "tui-grid": [ "resources/js/typings/grid.d.ts" ]
+        }
+    },
+    "include": [
+        "resources/js/**/*",
+    ]
+}

@@ -15,7 +15,7 @@ mix.browserSync({
     notify: false
 });
 
-mix.js('resources/js/app.js', 'public/js').vue()
+mix.ts('resources/js/app.ts', 'public/js').vue()
     // .postCss('resources/css/app.css', 'public/css', [
     //     //
     // ]);

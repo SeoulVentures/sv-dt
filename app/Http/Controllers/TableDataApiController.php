@@ -33,7 +33,7 @@ class TableDataApiController extends Controller
                 [ $options['sortColumn'], $options['sortAscending'] === 'false' ? 'desc' : 'asc' ]
             ]);
         }
-        if($options['filters'] !== '{}') {
+        if(!empty($options['filters'])) {
             $filters = json_decode($options['filters']);
             foreach($filters as $column => $rule) {
                 $contents = $contents->filter(function($row) use ($column, $rule) {
@@ -42,16 +42,16 @@ class TableDataApiController extends Controller
                             return $row->{$column} == $rule->value;
                             break;
                         case 'lt':
-                            return $row->{$column} > $rule->value;
-                            break;
-                        case 'gt':
                             return $row->{$column} < $rule->value;
                             break;
+                        case 'gt':
+                            return $row->{$column} > $rule->value;
+                            break;
                         case 'lte':
-                            return $row->{$column} >= $rule->value;
+                            return $row->{$column} <= $rule->value;
                             break;
                         case 'gte':
-                            return $row->{$column} <= $rule->value;
+                            return $row->{$column} >= $rule->value;
                             break;
                         case 'ne':
                             return $row->{$column} != $rule->value;
@@ -74,7 +74,7 @@ class TableDataApiController extends Controller
         $contents = $contents->slice(($page - 1) * $perPage, $perPage)->values()->toArray();
         $contents = array_map(function($row) {
             $keys = array_keys(get_object_vars($row));
-            foreach($keys as $key) $row->{$key} = htmlentities($row->{$key});
+            foreach($keys as $key) $row->{$key} = htmlentities(trim($row->{$key}));
             return $row;
         }, $contents);
 
@@ -103,7 +103,7 @@ class TableDataApiController extends Controller
 
         $data = get_object_vars($content);
         return response()->json(array_map(fn($row) => [
-            'header' => Str::ucfirst($row),
+            'header' => Str::title(Str::replace('_', ' ', $row)),
             'name' => $row,
             'filter' => [
                 'type' => is_integer($data[$row]) ? 'number' : 'text',

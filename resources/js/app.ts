@@ -1,10 +1,11 @@
-require('./bootstrap');
+// require('./bootstrap');
+import './bootstrap';
 
 import { createApp } from 'vue';
 import App from './vue/App.vue';
 
 // import { Grid } from '@toast-ui/vue-grid';
-import SvDataTable from './vue/SvDataTable.vue';
+import SvDataTable from '../../packages/sv-dt-vue/src/SvDataTable.vue';
 
 const app = createApp(App);
 
