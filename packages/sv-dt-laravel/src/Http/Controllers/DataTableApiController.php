@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace SeoulVentures\SvDataTable\Http\Controllers;
 
-use App\Models\Query;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SeoulVentures\SvDataTable\Models\SvDtQuery;
 
-class TableDataApiController extends Controller
+class DataTableApiController extends Controller
 {
     function read(Request $request) {
         $options = $request->all([
@@ -19,7 +19,7 @@ class TableDataApiController extends Controller
             'filters'
         ]);
 
-        $m = Query::find($options['queryId']);
+        $m = SvDtQuery::find($options['queryId']);
         if(!$m) return response()->json([
             'result' => false
         ]);
@@ -95,7 +95,7 @@ class TableDataApiController extends Controller
             'queryId'
         ]);
 
-        $m = Query::find($options['queryId']);
+        $m = SvDtQuery::find($options['queryId']);
         if(!$m) return response()->json([]);
 
         $content = DB::select($m->query)[0];

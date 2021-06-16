@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7759431e303e2d722a264a8a991a9e84",
+    "content-hash": "a7606e2fe5fcdf95bdc5be48998e5938",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2314,6 +2314,40 @@
                 }
             ],
             "time": "2020-08-18T17:17:46+00:00"
+        },
+        {
+            "name": "seoulventures/sv-dt-laravel",
+            "version": "dev-master",
+            "dist": {
+                "type": "path",
+                "url": "./packages/sv-dt-laravel",
+                "reference": "37b3e0d5d827b61fc4be53f7bd13ea91d31439a6"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "SeoulVentures\\SvDataTable\\DataTableServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SeoulVentures\\SvDataTable\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cocoa Hoto",
+                    "email": "cocoa@hoto.us"
+                }
+            ],
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -7334,7 +7368,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "seoulventures/sv-dt-laravel": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
