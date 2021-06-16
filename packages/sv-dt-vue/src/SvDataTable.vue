@@ -3,10 +3,11 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs, watch, ref, onMounted, ComponentPublicInstance } from 'vue';
+import { computed, defineComponent, reactive, toRefs, watch, ref, onMounted, ComponentPublicInstance, PropType } from 'vue';
 import Grid from 'tui-grid';
 import { NumberFilterCode, TextFilterCode } from 'tui-grid/types/store/filterLayerState';
 import { OptColumn } from 'tui-grid/types/options';
+import { Options, Parameters } from './types';
 
 export default defineComponent({
     props: {
@@ -15,17 +16,13 @@ export default defineComponent({
             required: true,
             default: 0
         },
-        scrollX: {
-            type: Boolean,
-            default: false
+        options: {
+            type: Object as PropType<Options>,
+            default: {}
         },
-        scrollY: {
-            type: Boolean,
-            default: false
-        },
-        perPage: {
-            type: Number,
-            default: 50
+        parameters: {
+            type: Object as PropType<Parameters>,
+            default: {}
         }
     },
     setup(props) {
@@ -39,11 +36,11 @@ export default defineComponent({
         onMounted(() => {
             state.gridInstance = new Grid({
                 el: grid.value!,
-                scrollX: props.scrollX,
-                scrollY: props.scrollY,
+                scrollX: props.options.scrollX ?? false,
+                scrollY: props.options.scrollY ?? false,
                 minBodyHeight: 30,
                 pageOptions: {
-                    perPage: props.perPage
+                    perPage: props.options.perPage ?? 50
                 },
                 copyOptions: {
                     customValue: value => {
@@ -56,12 +53,13 @@ export default defineComponent({
                 useClientSort: false,
                 data: {
                     api: {
-                        readData: { url: '/api/table/data', method: 'GET' }
+                        readData: { url: '/api/svdt/data', method: 'GET' }
                     },
                     serializer(params) {
                         params = Object.assign(params, {
                             filters: JSON.stringify(state.filters),
-                            queryId: props.queryId
+                            queryId: props.queryId,
+                            parameters: JSON.stringify(props.parameters)
                         });
                         return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
                     }
@@ -71,7 +69,7 @@ export default defineComponent({
         });
 
         watch(computed(() => props.queryId), async () => {
-            const res = await fetch(`/api/table/headers?queryId=${props.queryId}`);
+            const res = await fetch(`/api/svdt/headers?queryId=${props.queryId}&parameters=${encodeURIComponent(JSON.stringify(props.parameters))}`);
             state.headers = await res.json();
             if(state.gridInstance) state.gridInstance.setColumns(state.headers);
         }, { immediate: true });
@@ -107,6 +105,7 @@ export default defineComponent({
                     filterLayerState.activeFilterState = null;
                     filterLayerState.activeColumnAddress = null;
                     data.filters = null;
+                    state.gridInstance!.resetData([]);
                     state.gridInstance!.readData(1);
                 }));
                 document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
@@ -115,7 +114,18 @@ export default defineComponent({
                     }
                 }));
             });
-        })
+        });
+
+        watch(computed(() => JSON.stringify(props.parameters)), async () => {
+            if(!state.gridInstance) return;
+            state.filters = {};
+            const { data, filterLayerState } = state.gridInstance.store;
+            filterLayerState.activeFilterState = null;
+            filterLayerState.activeColumnAddress = null;
+            data.filters = null;
+            state.gridInstance.resetData([]);
+            state.gridInstance.readData(1);
+        });
 
         return {
             ...toRefs(state),

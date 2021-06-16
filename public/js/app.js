@@ -36752,7 +36752,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=6a4070ea
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=294a6f4e
 
 
 const _hoisted_1 = { ref: "grid" }
@@ -36760,7 +36760,7 @@ const _hoisted_1 = { ref: "grid" }
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)("div", _hoisted_1, null, 512))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=6a4070ea
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=294a6f4e
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __nested_webpack_require_1496686__(803);
@@ -36775,17 +36775,13 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             required: true,
             default: 0
         },
-        scrollX: {
-            type: Boolean,
-            default: false
+        options: {
+            type: Object,
+            default: {}
         },
-        scrollY: {
-            type: Boolean,
-            default: false
-        },
-        perPage: {
-            type: Number,
-            default: 50
+        parameters: {
+            type: Object,
+            default: {}
         }
     },
     setup(props) {
@@ -36798,11 +36794,11 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.onMounted)(() => {
             state.gridInstance = new (tui_grid_default())({
                 el: grid.value,
-                scrollX: props.scrollX,
-                scrollY: props.scrollY,
+                scrollX: props.options.scrollX ?? false,
+                scrollY: props.options.scrollY ?? false,
                 minBodyHeight: 30,
                 pageOptions: {
-                    perPage: props.perPage
+                    perPage: props.options.perPage ?? 50
                 },
                 copyOptions: {
                     customValue: value => {
@@ -36815,12 +36811,13 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                 useClientSort: false,
                 data: {
                     api: {
-                        readData: { url: '/api/table/data', method: 'GET' }
+                        readData: { url: '/api/svdt/data', method: 'GET' }
                     },
                     serializer(params) {
                         params = Object.assign(params, {
                             filters: JSON.stringify(state.filters),
-                            queryId: props.queryId
+                            queryId: props.queryId,
+                            parameters: JSON.stringify(props.parameters)
                         });
                         return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
                     }
@@ -36829,7 +36826,7 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             tui_grid_default().applyTheme('striped');
         });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryId), async () => {
-            const res = await fetch(`/api/table/headers?queryId=${props.queryId}`);
+            const res = await fetch(`/api/svdt/headers?queryId=${props.queryId}&parameters=${encodeURIComponent(JSON.stringify(props.parameters))}`);
             state.headers = await res.json();
             if (state.gridInstance)
                 state.gridInstance.setColumns(state.headers);
@@ -36865,6 +36862,7 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                     filterLayerState.activeFilterState = null;
                     filterLayerState.activeColumnAddress = null;
                     data.filters = null;
+                    state.gridInstance.resetData([]);
                     state.gridInstance.readData(1);
                 }));
                 document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
@@ -36873,6 +36871,17 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                     }
                 }));
             });
+        });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => JSON.stringify(props.parameters)), async () => {
+            if (!state.gridInstance)
+                return;
+            state.filters = {};
+            const { data, filterLayerState } = state.gridInstance.store;
+            filterLayerState.activeFilterState = null;
+            filterLayerState.activeColumnAddress = null;
+            data.filters = null;
+            state.gridInstance.resetData([]);
+            state.gridInstance.readData(1);
         });
         return {
             ...(0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.toRefs)(state),
@@ -53496,8 +53505,31 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   setup: function setup() {
-    var state = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)({});
-    return _objectSpread({}, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRefs)(state));
+    var state = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)({
+      target: ''
+    });
+    (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)((0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
+      return window.location.search;
+    }), function () {
+      var _params$target;
+
+      if (!window.location.search.length) return state.target = '';
+      var params = window.location.search.substr(1).split('&').map(function (e) {
+        return e.split('=');
+      }).reduce(function (o, v) {
+        o[v[0]] = v[1];
+        return o;
+      }, {});
+      state.target = (_params$target = params.target) !== null && _params$target !== void 0 ? _params$target : '';
+    }, {
+      immediate: true
+    });
+    var parameters = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
+      return state;
+    });
+    return _objectSpread(_objectSpread({}, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRefs)(state)), {}, {
+      parameters: parameters
+    });
   }
 }));
 
@@ -53556,8 +53588,17 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_sv_data_table = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("sv-data-table");
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <router-view /> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_sv_data_table, {
-    queryId: 1
-  })], 2112
+    queryId: 2,
+    options: {
+      perPage: 5
+    },
+    parameters: _ctx.parameters,
+    "onUpdate:parameters": _cache[1] || (_cache[1] = function ($event) {
+      return _ctx.parameters = $event;
+    })
+  }, null, 8
+  /* PROPS */
+  , ["parameters"])], 2112
   /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */
   );
 }

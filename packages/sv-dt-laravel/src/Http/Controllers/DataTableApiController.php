@@ -15,8 +15,10 @@ class DataTableApiController extends Controller
             'perPage',
             'sortColumn',
             'sortAscending',
+            // 'sortings',
             'queryId',
-            'filters'
+            'filters',
+            'parameters'
         ]);
 
         $m = SvDtQuery::find($options['queryId']);
@@ -26,13 +28,19 @@ class DataTableApiController extends Controller
 
         $page = intval($options['page'] ?? 1);
         $perPage = intval($options['perPage'] ?? 50);
+        $parameters = json_decode($options['parameters'] ?? '{}');
 
-        $contents = collect(DB::select($m->query));
+        $contents = collect(DB::select($m->query, get_object_vars($parameters)));
+
         if($options['sortColumn']) {
             $contents = $contents->sortBy([
                 [ $options['sortColumn'], $options['sortAscending'] === 'false' ? 'desc' : 'asc' ]
             ]);
         }
+        // if(!empty($options['sortings'])) {
+        //     $sortings = json_decode($options['sortings']);
+        //     $contents = $contents->sortBy($sortings);
+        // }
         if(!empty($options['filters'])) {
             $filters = json_decode($options['filters']);
             foreach($filters as $column => $rule) {
@@ -92,13 +100,15 @@ class DataTableApiController extends Controller
 
     function headers(Request $request) {
         $options = $request->all([
-            'queryId'
+            'queryId',
+            'parameters'
         ]);
+        $parameters = json_decode($options['parameters'] ?? '{}');
 
         $m = SvDtQuery::find($options['queryId']);
         if(!$m) return response()->json([]);
 
-        $content = DB::select($m->query)[0];
+        $content = DB::select($m->query, get_object_vars($parameters))[0];
         if(!$content) return response()->json([]);
 
         $data = get_object_vars($content);

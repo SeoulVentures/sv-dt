@@ -3,5 +3,5 @@
 use Illuminate\Support\Facades\Route;
 use SeoulVentures\SvDataTable\Http\Controllers\DataTableApiController;
 
-Route::get('/table/headers', [ DataTableApiController::class, 'headers' ]);
-Route::get('/table/data', [ DataTableApiController::class, 'read' ]);
+Route::get('/svdt/headers', [ DataTableApiController::class, 'headers' ]);
+Route::get('/svdt/data', [ DataTableApiController::class, 'read' ]);

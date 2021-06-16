@@ -1,5 +1,4 @@
-/* eslint-disable */
-declare module '@seoulventures/sv-dt' {
+export declare module '@seoulventures/sv-dt' {
     import type { DefineComponent } from 'vue'
     const component: DefineComponent<{}, {}, any>
     export default component

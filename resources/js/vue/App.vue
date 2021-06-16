@@ -1,15 +1,35 @@
 <template>
   <!-- <router-view /> -->
-  <sv-data-table :queryId="1" />
+  <sv-data-table :queryId="2" :options="{ perPage: 5 }" v-model:parameters="parameters" />
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs } from 'vue';
+import { computed, defineComponent, reactive, toRefs, watch } from 'vue';
+
+interface KeyValueObject {
+    [key: string]: string | undefined;
+}
 
 export default defineComponent({
-    setup () {
-        const state = reactive({});
-        return { ...toRefs(state) };
+    setup() {
+        const state = reactive({
+            target: ''
+        });
+
+        watch(computed(() => window.location.search), () => {
+            if(!window.location.search.length) return state.target = '';
+            const params = window.location.search.substr(1).split('&').map(e => e.split('=')).reduce((o, v) => {
+                o[v[0]] = v[1];
+                return o;
+            }, {} as KeyValueObject);
+            state.target = params.target ?? '';
+        }, { immediate: true });
+
+        const parameters = computed(() => {
+            return state;
+        });
+
+        return { ...toRefs(state), parameters };
     }
 });
 </script>
