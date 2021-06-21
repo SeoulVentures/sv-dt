@@ -20,12 +20,13 @@
         "typeRoots": [
             "./node_modules/@types",
             "resources/js/typings"
-        ],
-        "paths": {
-            // "tui-grid": [ "resources/js/typings/grid.d.ts" ]
-        }
+        ]
     },
     "include": [
         "resources/js/**/*",
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
     ]
 }

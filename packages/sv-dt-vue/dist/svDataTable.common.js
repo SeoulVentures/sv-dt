@@ -36743,7 +36743,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = require("vue");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=294a6f4e
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=da477fbe
 
 
 const _hoisted_1 = { ref: "grid" }
@@ -36751,7 +36751,7 @@ const _hoisted_1 = { ref: "grid" }
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)("div", _hoisted_1, null, 512))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=294a6f4e
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=da477fbe
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36761,6 +36761,10 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
 
 /* harmony default export */ const SvDataTablevue_type_script_lang_ts = ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.defineComponent)({
     props: {
+        queryUrl: {
+            type: String,
+            default: '/api/svdt/data'
+        },
         queryId: {
             type: Number,
             required: true,
@@ -36768,70 +36772,118 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
         },
         options: {
             type: Object,
-            default: {}
+            default: {
+                scrollX: false,
+                scrollY: false,
+                perPage: 50
+            }
         },
         parameters: {
             type: Object,
             default: {}
+        },
+        headers: {
+            type: Array
         }
     },
     setup(props) {
-        const state = (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.reactive)({
+        const store = (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.reactive)({
             headers: [],
             gridInstance: undefined,
-            filters: {}
+            filters: {},
+            pendingFilters: []
         });
         const grid = (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.ref)();
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.onMounted)(() => {
-            state.gridInstance = new (tui_grid_default())({
-                el: grid.value,
-                scrollX: props.options.scrollX ?? false,
-                scrollY: props.options.scrollY ?? false,
-                minBodyHeight: 30,
-                pageOptions: {
-                    perPage: props.options.perPage ?? 50
-                },
-                copyOptions: {
-                    customValue: value => {
-                        const e = document.createElement('div');
-                        e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
-                        return e.childNodes[0]?.nodeValue || '';
-                    }
-                },
-                columns: state.headers,
-                useClientSort: false,
-                data: {
-                    api: {
-                        readData: { url: '/api/svdt/data', method: 'GET' }
-                    },
-                    serializer(params) {
-                        params = Object.assign(params, {
-                            filters: JSON.stringify(state.filters),
-                            queryId: props.queryId,
-                            parameters: JSON.stringify(props.parameters)
-                        });
-                        return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
-                    }
-                }
+        const serializer = (params) => {
+            params = Object.assign(params, {
+                queryId: props.queryId,
+                filters: JSON.stringify(store.filters),
+                parameters: JSON.stringify(props.parameters)
             });
-            tui_grid_default().applyTheme('striped');
-        });
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryId), async () => {
-            const res = await fetch(`/api/svdt/headers?queryId=${props.queryId}&parameters=${encodeURIComponent(JSON.stringify(props.parameters))}`);
-            state.headers = await res.json();
-            if (state.gridInstance)
-                state.gridInstance.setColumns(state.headers);
-        }, { immediate: true });
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => state.gridInstance), async () => {
-            if (!state.gridInstance)
+            return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
+        };
+        const applyPendingFilters = () => {
+            if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}')
                 return;
-            state.gridInstance.on('onGridUpdated', (_ev) => {
-                for (const [key, value] of Object.entries(state.filters)) {
-                    state.gridInstance.filter(key, [value]);
+            if (store.pendingFilters.length) {
+                let currentFilter = null;
+                while (currentFilter = store.pendingFilters.shift()) {
+                    store.gridInstance.filter(...currentFilter);
+                }
+            }
+        };
+        const updateHeader = async () => {
+            if (props.headers && props.headers.length > 0) {
+                store.headers = props.headers;
+                return;
+            }
+            const res = await fetch(`/api/svdt/data?${serializer({
+                page: 1,
+                perPage: 1
+            })}`);
+            const response = await res.json();
+            if (!response.result && !response.data.contents.length)
+                return;
+            const row = response.data.contents[0];
+            store.headers = Object.keys(row).filter(e => !e.startsWith('_')).map(e => {
+                return {
+                    name: e,
+                    header: e.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
+                    filter: {
+                        type: typeof row[e] === 'number' ? 'number' : 'text',
+                        showApplyBtn: true,
+                        showClearBtn: true
+                    },
+                    sortable: true
+                };
+            });
+            if (store.gridInstance) {
+                store.gridInstance.setColumns(store.headers);
+            }
+            applyPendingFilters();
+        };
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.onMounted)(() => {
+            tui_grid_default().applyTheme('striped');
+            (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryUrl), async () => {
+                store.gridInstance = new (tui_grid_default())({
+                    el: grid.value,
+                    scrollX: !!props.options.scrollX,
+                    scrollY: !!props.options.scrollY,
+                    minBodyHeight: 30,
+                    pageOptions: {
+                        perPage: props.options.perPage ?? 15
+                    },
+                    copyOptions: {
+                        customValue: value => {
+                            const e = document.createElement('div');
+                            e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
+                            return e.childNodes[0]?.nodeValue || '';
+                        }
+                    },
+                    columns: store.headers,
+                    useClientSort: false,
+                    data: {
+                        api: {
+                            readData: { url: props.queryUrl, method: 'GET' }
+                        },
+                        serializer
+                    }
+                });
+            }, { immediate: true });
+            applyPendingFilters();
+        });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryId), updateHeader, { immediate: true });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => store.gridInstance), async () => {
+            if (!store.gridInstance)
+                return;
+            await updateHeader();
+            store.gridInstance.on('onGridUpdated', (_ev) => {
+                for (const [key, value] of Object.entries(store.filters)) {
+                    store.gridInstance.filter(key, [value]);
                 }
             });
-            state.gridInstance.on('beforeSort', (_ev, { columns } = state.gridInstance.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
-            state.gridInstance.on('filter', (ev) => {
+            store.gridInstance.on('beforeSort', (_ev, { columns } = store.gridInstance.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
+            store.gridInstance.on('filter', (ev) => {
                 const filters = ev.filterState?.map(e => {
                     const { columnName, state } = e;
                     return {
@@ -36842,19 +36894,19 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                 }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {});
                 if (!filters)
                     return;
-                if (JSON.stringify(state.filters) === JSON.stringify(filters))
+                if (JSON.stringify(store.filters) === JSON.stringify(filters))
                     return;
-                state.filters = filters;
-                state.gridInstance.resetData([]);
-                state.gridInstance.readData(1);
+                store.filters = filters;
+                store.gridInstance.resetData([]);
+                store.gridInstance.readData(1);
                 document.querySelectorAll('.tui-grid-filter-btn-clear').forEach(e => e.addEventListener('click', () => {
-                    state.filters = {};
-                    const { data, filterLayerState } = state.gridInstance.store;
+                    store.filters = {};
+                    const { data, filterLayerState } = store.gridInstance.store;
                     filterLayerState.activeFilterState = null;
                     filterLayerState.activeColumnAddress = null;
                     data.filters = null;
-                    state.gridInstance.resetData([]);
-                    state.gridInstance.readData(1);
+                    store.gridInstance.resetData([]);
+                    store.gridInstance.readData(1);
                 }));
                 document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
                     if (e.parentElement?.parentElement?.querySelector('input')?.value.length === 0) { // Element exists & value length 0
@@ -36864,18 +36916,45 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
             });
         });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => JSON.stringify(props.parameters)), async () => {
-            if (!state.gridInstance)
+            if (!store.gridInstance)
                 return;
-            state.filters = {};
-            const { data, filterLayerState } = state.gridInstance.store;
+            store.filters = {};
+            const { data, filterLayerState } = store.gridInstance.store;
             filterLayerState.activeFilterState = null;
             filterLayerState.activeColumnAddress = null;
             data.filters = null;
-            state.gridInstance.resetData([]);
-            state.gridInstance.readData(1);
+            await updateHeader();
+            store.gridInstance.resetData([]);
+            store.gridInstance.readData(1);
         });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => JSON.stringify(props.headers)), async () => {
+            if (!props.headers || !props.headers.length)
+                return await updateHeader();
+            store.headers = props.headers;
+            if (store.gridInstance)
+                store.gridInstance.setColumns(store.headers);
+            applyPendingFilters();
+        });
+        const methods = {
+            filter: (columnName, state) => {
+                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
+                    store.pendingFilters.push([columnName, [state]]);
+                    return;
+                }
+                return store.gridInstance.filter(columnName, [state]);
+            },
+            unfilter: (columnName) => {
+                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
+                    if (columnName === undefined)
+                        store.pendingFilters = [];
+                    store.pendingFilters = store.pendingFilters.filter(([name]) => name !== columnName);
+                    return;
+                }
+                return store.gridInstance.unfilter(columnName);
+            }
+        };
         return {
-            ...(0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.toRefs)(state),
+            ...methods,
             grid
         };
     }

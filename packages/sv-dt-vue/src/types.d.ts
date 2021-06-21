@@ -9,5 +9,21 @@ export interface Parameters {
 }
 
 export interface KeyValueObject {
-    [key: string]: string | undefined;
+    [key: string]: string | number | undefined;
+}
+
+export interface ApiDataResponse {
+    result: true;
+    data: {
+        contents: KeyValueObject[];
+        pagination: {
+            page: number;
+            totalCount: number;
+        }
+    }
+}
+
+export interface ApiDataResponse {
+    result: false;
+    message?: string;
 }

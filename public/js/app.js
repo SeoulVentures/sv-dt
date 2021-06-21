@@ -36752,7 +36752,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=294a6f4e
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=da477fbe
 
 
 const _hoisted_1 = { ref: "grid" }
@@ -36760,7 +36760,7 @@ const _hoisted_1 = { ref: "grid" }
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)("div", _hoisted_1, null, 512))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=294a6f4e
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=da477fbe
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __nested_webpack_require_1496686__(803);
@@ -36770,6 +36770,10 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
 
 /* harmony default export */ const SvDataTablevue_type_script_lang_ts = ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.defineComponent)({
     props: {
+        queryUrl: {
+            type: String,
+            default: '/api/svdt/data'
+        },
         queryId: {
             type: Number,
             required: true,
@@ -36777,70 +36781,118 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
         },
         options: {
             type: Object,
-            default: {}
+            default: {
+                scrollX: false,
+                scrollY: false,
+                perPage: 50
+            }
         },
         parameters: {
             type: Object,
             default: {}
+        },
+        headers: {
+            type: Array
         }
     },
     setup(props) {
-        const state = (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.reactive)({
+        const store = (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.reactive)({
             headers: [],
             gridInstance: undefined,
-            filters: {}
+            filters: {},
+            pendingFilters: []
         });
         const grid = (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.ref)();
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.onMounted)(() => {
-            state.gridInstance = new (tui_grid_default())({
-                el: grid.value,
-                scrollX: props.options.scrollX ?? false,
-                scrollY: props.options.scrollY ?? false,
-                minBodyHeight: 30,
-                pageOptions: {
-                    perPage: props.options.perPage ?? 50
-                },
-                copyOptions: {
-                    customValue: value => {
-                        const e = document.createElement('div');
-                        e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
-                        return e.childNodes[0]?.nodeValue || '';
-                    }
-                },
-                columns: state.headers,
-                useClientSort: false,
-                data: {
-                    api: {
-                        readData: { url: '/api/svdt/data', method: 'GET' }
-                    },
-                    serializer(params) {
-                        params = Object.assign(params, {
-                            filters: JSON.stringify(state.filters),
-                            queryId: props.queryId,
-                            parameters: JSON.stringify(props.parameters)
-                        });
-                        return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
-                    }
-                }
+        const serializer = (params) => {
+            params = Object.assign(params, {
+                queryId: props.queryId,
+                filters: JSON.stringify(store.filters),
+                parameters: JSON.stringify(props.parameters)
             });
-            tui_grid_default().applyTheme('striped');
-        });
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryId), async () => {
-            const res = await fetch(`/api/svdt/headers?queryId=${props.queryId}&parameters=${encodeURIComponent(JSON.stringify(props.parameters))}`);
-            state.headers = await res.json();
-            if (state.gridInstance)
-                state.gridInstance.setColumns(state.headers);
-        }, { immediate: true });
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => state.gridInstance), async () => {
-            if (!state.gridInstance)
+            return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
+        };
+        const applyPendingFilters = () => {
+            if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}')
                 return;
-            state.gridInstance.on('onGridUpdated', (_ev) => {
-                for (const [key, value] of Object.entries(state.filters)) {
-                    state.gridInstance.filter(key, [value]);
+            if (store.pendingFilters.length) {
+                let currentFilter = null;
+                while (currentFilter = store.pendingFilters.shift()) {
+                    store.gridInstance.filter(...currentFilter);
+                }
+            }
+        };
+        const updateHeader = async () => {
+            if (props.headers && props.headers.length > 0) {
+                store.headers = props.headers;
+                return;
+            }
+            const res = await fetch(`/api/svdt/data?${serializer({
+                page: 1,
+                perPage: 1
+            })}`);
+            const response = await res.json();
+            if (!response.result && !response.data.contents.length)
+                return;
+            const row = response.data.contents[0];
+            store.headers = Object.keys(row).filter(e => !e.startsWith('_')).map(e => {
+                return {
+                    name: e,
+                    header: e.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
+                    filter: {
+                        type: typeof row[e] === 'number' ? 'number' : 'text',
+                        showApplyBtn: true,
+                        showClearBtn: true
+                    },
+                    sortable: true
+                };
+            });
+            if (store.gridInstance) {
+                store.gridInstance.setColumns(store.headers);
+            }
+            applyPendingFilters();
+        };
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.onMounted)(() => {
+            tui_grid_default().applyTheme('striped');
+            (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryUrl), async () => {
+                store.gridInstance = new (tui_grid_default())({
+                    el: grid.value,
+                    scrollX: !!props.options.scrollX,
+                    scrollY: !!props.options.scrollY,
+                    minBodyHeight: 30,
+                    pageOptions: {
+                        perPage: props.options.perPage ?? 15
+                    },
+                    copyOptions: {
+                        customValue: value => {
+                            const e = document.createElement('div');
+                            e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
+                            return e.childNodes[0]?.nodeValue || '';
+                        }
+                    },
+                    columns: store.headers,
+                    useClientSort: false,
+                    data: {
+                        api: {
+                            readData: { url: props.queryUrl, method: 'GET' }
+                        },
+                        serializer
+                    }
+                });
+            }, { immediate: true });
+            applyPendingFilters();
+        });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryId), updateHeader, { immediate: true });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => store.gridInstance), async () => {
+            if (!store.gridInstance)
+                return;
+            await updateHeader();
+            store.gridInstance.on('onGridUpdated', (_ev) => {
+                for (const [key, value] of Object.entries(store.filters)) {
+                    store.gridInstance.filter(key, [value]);
                 }
             });
-            state.gridInstance.on('beforeSort', (_ev, { columns } = state.gridInstance.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
-            state.gridInstance.on('filter', (ev) => {
+            store.gridInstance.on('beforeSort', (_ev, { columns } = store.gridInstance.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
+            store.gridInstance.on('filter', (ev) => {
                 const filters = ev.filterState?.map(e => {
                     const { columnName, state } = e;
                     return {
@@ -36851,19 +36903,19 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                 }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {});
                 if (!filters)
                     return;
-                if (JSON.stringify(state.filters) === JSON.stringify(filters))
+                if (JSON.stringify(store.filters) === JSON.stringify(filters))
                     return;
-                state.filters = filters;
-                state.gridInstance.resetData([]);
-                state.gridInstance.readData(1);
+                store.filters = filters;
+                store.gridInstance.resetData([]);
+                store.gridInstance.readData(1);
                 document.querySelectorAll('.tui-grid-filter-btn-clear').forEach(e => e.addEventListener('click', () => {
-                    state.filters = {};
-                    const { data, filterLayerState } = state.gridInstance.store;
+                    store.filters = {};
+                    const { data, filterLayerState } = store.gridInstance.store;
                     filterLayerState.activeFilterState = null;
                     filterLayerState.activeColumnAddress = null;
                     data.filters = null;
-                    state.gridInstance.resetData([]);
-                    state.gridInstance.readData(1);
+                    store.gridInstance.resetData([]);
+                    store.gridInstance.readData(1);
                 }));
                 document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
                     if (e.parentElement?.parentElement?.querySelector('input')?.value.length === 0) { // Element exists & value length 0
@@ -36873,18 +36925,45 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             });
         });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => JSON.stringify(props.parameters)), async () => {
-            if (!state.gridInstance)
+            if (!store.gridInstance)
                 return;
-            state.filters = {};
-            const { data, filterLayerState } = state.gridInstance.store;
+            store.filters = {};
+            const { data, filterLayerState } = store.gridInstance.store;
             filterLayerState.activeFilterState = null;
             filterLayerState.activeColumnAddress = null;
             data.filters = null;
-            state.gridInstance.resetData([]);
-            state.gridInstance.readData(1);
+            await updateHeader();
+            store.gridInstance.resetData([]);
+            store.gridInstance.readData(1);
         });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => JSON.stringify(props.headers)), async () => {
+            if (!props.headers || !props.headers.length)
+                return await updateHeader();
+            store.headers = props.headers;
+            if (store.gridInstance)
+                store.gridInstance.setColumns(store.headers);
+            applyPendingFilters();
+        });
+        const methods = {
+            filter: (columnName, state) => {
+                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
+                    store.pendingFilters.push([columnName, [state]]);
+                    return;
+                }
+                return store.gridInstance.filter(columnName, [state]);
+            },
+            unfilter: (columnName) => {
+                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
+                    if (columnName === undefined)
+                        store.pendingFilters = [];
+                    store.pendingFilters = store.pendingFilters.filter(([name]) => name !== columnName);
+                    return;
+                }
+                return store.gridInstance.unfilter(columnName);
+            }
+        };
         return {
-            ...(0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.toRefs)(state),
+            ...methods,
             grid
         };
     }
@@ -53502,33 +53581,91 @@ function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { va
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+function _iterableToArrayLimit(arr, i) { var _i = arr && (typeof Symbol !== "undefined" && arr[Symbol.iterator] || arr["@@iterator"]); if (_i == null) return; var _arr = []; var _n = true; var _d = false; var _s, _e; try { for (_i = _i.call(arr); !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ((0,vue__WEBPACK_IMPORTED_MODULE_0__.defineComponent)({
   setup: function setup() {
     var state = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)({
-      target: ''
+      queryId: 1,
+      params: {},
+      headers: []
     });
+    var dt = (0,vue__WEBPACK_IMPORTED_MODULE_0__.ref)();
     (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)((0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
       return window.location.search;
     }), function () {
-      var _params$target;
-
-      if (!window.location.search.length) return state.target = '';
+      if (!window.location.search.length) return state.params = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)({});
       var params = window.location.search.substr(1).split('&').map(function (e) {
         return e.split('=');
       }).reduce(function (o, v) {
-        o[v[0]] = v[1];
+        o[v.shift()] = v.join('=');
         return o;
       }, {});
-      state.target = (_params$target = params.target) !== null && _params$target !== void 0 ? _params$target : '';
+      state.queryId = Number(params.queryId);
+      delete params.queryId;
+
+      if (params.headers) {
+        state.headers = params.headers.split(',').map(function (e) {
+          return e.trim();
+        }).map(decodeURI).map(function (e) {
+          return e.split(';');
+        }).map(function (e) {
+          return {
+            name: e.shift(),
+            header: e.shift()
+          };
+        });
+      }
+
+      delete params.headers;
+
+      if (params.filters) {
+        var filters = params.filters;
+        (0,vue__WEBPACK_IMPORTED_MODULE_0__.onMounted)(function () {
+          (0,vue__WEBPACK_IMPORTED_MODULE_0__.watch)((0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
+            return dt.value;
+          }), function () {
+            filters.split(';').map(function (e) {
+              return e.trim();
+            }).map(decodeURI).map(function (e) {
+              return e.split('+');
+            }).forEach(function (e) {
+              if (!dt.value) return;
+
+              var _e2 = _slicedToArray(e, 3),
+                  columnName = _e2[0],
+                  code = _e2[1],
+                  value = _e2[2];
+
+              dt.value.filter(columnName, {
+                code: code,
+                value: value
+              });
+            });
+          }, {
+            immediate: true
+          });
+        });
+      }
+
+      delete params.filters;
+      state.params = (0,vue__WEBPACK_IMPORTED_MODULE_0__.reactive)(params);
     }, {
       immediate: true
     });
-    var parameters = (0,vue__WEBPACK_IMPORTED_MODULE_0__.computed)(function () {
-      return state;
-    });
     return _objectSpread(_objectSpread({}, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRefs)(state)), {}, {
-      parameters: parameters
+      dt: dt
     });
   }
 }));
@@ -53588,17 +53725,22 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
   var _component_sv_data_table = (0,vue__WEBPACK_IMPORTED_MODULE_0__.resolveComponent)("sv-data-table");
 
   return (0,vue__WEBPACK_IMPORTED_MODULE_0__.openBlock)(), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createBlock)(vue__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, [(0,vue__WEBPACK_IMPORTED_MODULE_0__.createCommentVNode)(" <router-view /> "), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)(_component_sv_data_table, {
-    queryId: 2,
+    queryId: _ctx.queryId,
     options: {
-      perPage: 5
+      scrollX: false
     },
-    parameters: _ctx.parameters,
+    parameters: _ctx.params,
     "onUpdate:parameters": _cache[1] || (_cache[1] = function ($event) {
-      return _ctx.parameters = $event;
-    })
+      return _ctx.params = $event;
+    }),
+    headers: _ctx.headers,
+    "onUpdate:headers": _cache[2] || (_cache[2] = function ($event) {
+      return _ctx.headers = $event;
+    }),
+    ref: "dt"
   }, null, 8
   /* PROPS */
-  , ["parameters"])], 2112
+  , ["queryId", "parameters", "headers"])], 2112
   /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */
   );
 }
