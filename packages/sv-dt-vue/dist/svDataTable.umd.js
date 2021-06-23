@@ -36761,7 +36761,7 @@ if (typeof window !== 'undefined') {
 
 // EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__(507);
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=da477fbe
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=1ecb8812
 
 
 const _hoisted_1 = { ref: "grid" }
@@ -36769,7 +36769,7 @@ const _hoisted_1 = { ref: "grid" }
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_.createBlock)("div", _hoisted_1, null, 512))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=da477fbe
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=1ecb8812
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36830,12 +36830,24 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                 }
             }
         };
+        const createHeaderObject = (header) => {
+            return {
+                name: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
+                header: header.target,
+                filter: header.filterAs ? {
+                    type: header.filterAs,
+                    showApplyBtn: true,
+                    showClearBtn: true
+                } : undefined,
+                sortable: header.sortable
+            };
+        };
         const updateHeader = async () => {
             if (props.headers && props.headers.length > 0) {
-                store.headers = props.headers;
+                store.headers = props.headers.map(createHeaderObject);
                 return;
             }
-            const res = await fetch(`/api/svdt/data?${serializer({
+            const res = await fetch(`${props.queryUrl}?${serializer({
                 page: 1,
                 perPage: 1
             })}`);
@@ -36948,7 +36960,7 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_.computed)(() => JSON.stringify(props.headers)), async () => {
             if (!props.headers || !props.headers.length)
                 return await updateHeader();
-            store.headers = props.headers;
+            store.headers = props.headers.map(createHeaderObject);
             if (store.gridInstance)
                 store.gridInstance.setColumns(store.headers);
             applyPendingFilters();

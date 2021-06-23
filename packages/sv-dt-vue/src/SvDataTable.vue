@@ -7,7 +7,7 @@ import { computed, defineComponent, reactive, toRefs, watch, ref, onMounted, Com
 import Grid, { Params } from 'tui-grid';
 import { FilterState, NumberFilterCode, TextFilterCode } from 'tui-grid/types/store/filterLayerState';
 import { OptColumn } from 'tui-grid/types/options';
-import { ApiDataResponse, Options, Parameters } from './types';
+import { ApiDataResponse, HeaderProp, Options, Parameters } from './types';
 
 export default defineComponent({
     props: {
@@ -33,7 +33,7 @@ export default defineComponent({
             default: {}
         },
         headers: {
-            type: Array as PropType<OptColumn[]>
+            type: Array as PropType<HeaderProp[]>
         }
     },
     setup(props) {
@@ -64,12 +64,25 @@ export default defineComponent({
             }
         }
 
+        const createHeaderObject = (header: HeaderProp): OptColumn => {
+            return {
+                name: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
+                header: header.target,
+                filter: header.filterAs ? {
+                    type: header.filterAs,
+                    showApplyBtn: true,
+                    showClearBtn: true
+                } : undefined,
+                sortable: header.sortable
+            }
+        }
+
         const updateHeader = async () => {
             if(props.headers && props.headers.length > 0) {
-                store.headers = props.headers;
+                store.headers = props.headers.map(createHeaderObject);
                 return;
             }
-            const res = await fetch(`/api/svdt/data?${serializer({
+            const res = await fetch(`${props.queryUrl}?${serializer({
                 page: 1,
                 perPage: 1
             })}`);
@@ -183,7 +196,7 @@ export default defineComponent({
 
         watch(computed(() => JSON.stringify(props.headers)), async () => {
             if(!props.headers || !props.headers.length) return await updateHeader();
-            store.headers = props.headers;
+            store.headers = props.headers.map(createHeaderObject);
             if(store.gridInstance) store.gridInstance.setColumns(store.headers);
             applyPendingFilters();
         });

@@ -8,6 +8,13 @@ export interface Parameters {
     [key: string]: string | number;
 }
 
+export interface HeaderProp {
+    name?: string;
+    target: string;
+    filterAs?: 'text' | 'number';
+    sortable: boolean;
+}
+
 export interface KeyValueObject {
     [key: string]: string | number | undefined;
 }
