@@ -17,7 +17,7 @@ export default defineComponent({
 			const state = reactive({
 					queryId: 1,
 					params: {} as KeyValueObject,
-					headers: [] as { name: string; }[]
+					headers: [] as { name?: string; }[]
 			});
 
 			const dt = ref<ComponentPublicInstance<SvDataTable>>();
@@ -33,8 +33,8 @@ export default defineComponent({
 				if(params.headers) {
 					state.headers = (params.headers! as string).split(',').map(e => e.trim()).map(decodeURI).map(e => e.split(';')).map(e => {
 						return {
-							name: e.shift()!,
-							header: e.shift(),
+							target: e.shift()!,
+							name: e.shift(),
 						};
 					});
 				}

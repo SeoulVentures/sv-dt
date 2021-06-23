@@ -66,8 +66,8 @@ export default defineComponent({
 
         const createHeaderObject = (header: HeaderProp): OptColumn => {
             return {
-                name: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                header: header.target,
+                name: header.target,
+                header: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
                 filter: header.filterAs ? {
                     type: header.filterAs,
                     showApplyBtn: true,

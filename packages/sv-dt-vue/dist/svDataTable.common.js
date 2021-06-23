@@ -36743,7 +36743,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = require("vue");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=1ecb8812
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=1e5769b2
 
 
 const _hoisted_1 = { ref: "grid" }
@@ -36751,7 +36751,7 @@ const _hoisted_1 = { ref: "grid" }
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)("div", _hoisted_1, null, 512))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=1ecb8812
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=1e5769b2
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36814,8 +36814,8 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
         };
         const createHeaderObject = (header) => {
             return {
-                name: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                header: header.target,
+                name: header.target,
+                header: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
                 filter: header.filterAs ? {
                     type: header.filterAs,
                     showApplyBtn: true,

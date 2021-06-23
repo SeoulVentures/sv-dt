@@ -12,7 +12,7 @@ export interface HeaderProp {
     name?: string;
     target: string;
     filterAs?: 'text' | 'number';
-    sortable: boolean;
+    sortable?: boolean;
 }
 
 export interface KeyValueObject {
