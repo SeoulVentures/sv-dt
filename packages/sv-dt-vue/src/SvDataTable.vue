@@ -109,7 +109,8 @@ export default defineComponent({
 
         onMounted(() => {
             Grid.applyTheme('striped');
-            watch(computed(() => props.queryUrl), async () => {
+            watch(computed(() => [ props.queryId, props.queryUrl ]), async () => {
+                if(store.gridInstance) store.gridInstance.destroy();
                 store.gridInstance = new Grid({
                     el: grid.value!,
                     scrollX: !!props.options.scrollX,
@@ -138,7 +139,7 @@ export default defineComponent({
             applyPendingFilters();
         });
 
-        watch(computed(() => props.queryId), updateHeader, { immediate: true });
+        // watch(computed(() => props.queryId), updateHeader, { immediate: true });
 
         watch(computed(() => store.gridInstance), async () => {
             if(!store.gridInstance) return;

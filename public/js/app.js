@@ -36752,7 +36752,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=1e5769b2
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=701f0f51
 
 
 const _hoisted_1 = { ref: "grid" }
@@ -36760,7 +36760,7 @@ const _hoisted_1 = { ref: "grid" }
 function render(_ctx, _cache, $props, $setup, $data, $options) {
   return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)("div", _hoisted_1, null, 512))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=1e5769b2
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=701f0f51
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __nested_webpack_require_1496686__(803);
@@ -36865,7 +36865,9 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
         };
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.onMounted)(() => {
             tui_grid_default().applyTheme('striped');
-            (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryUrl), async () => {
+            (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => [props.queryId, props.queryUrl]), async () => {
+                if (store.gridInstance)
+                    store.gridInstance.destroy();
                 store.gridInstance = new (tui_grid_default())({
                     el: grid.value,
                     scrollX: !!props.options.scrollX,
@@ -36893,7 +36895,7 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             }, { immediate: true });
             applyPendingFilters();
         });
-        (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => props.queryId), updateHeader, { immediate: true });
+        // watch(computed(() => props.queryId), updateHeader, { immediate: true });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => store.gridInstance), async () => {
             if (!store.gridInstance)
                 return;
