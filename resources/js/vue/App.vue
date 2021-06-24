@@ -15,9 +15,9 @@ interface KeyValueObject {
 export default defineComponent({
 		setup() {
 			const state = reactive({
-					queryId: 1,
-					params: {} as KeyValueObject,
-					headers: [] as { name?: string; }[]
+                queryId: 1,
+                params: {} as KeyValueObject,
+                headers: [] as { name?: string; }[]
 			});
 
 			const dt = ref<ComponentPublicInstance<SvDataTable>>();
