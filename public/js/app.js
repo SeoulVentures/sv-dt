@@ -36752,15 +36752,22 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=701f0f51
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=72ab61fc
 
 
-const _hoisted_1 = { ref: "grid" }
+const _hoisted_1 = /*#__PURE__*/(0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createVNode)("span", {
+  class: "tui-grid-cell",
+  style: {"display":"none","font-family":"Arial, '\\B3CB\\C6C0', Dotum, sans-serif","font-size":"13px","font-weight":"400"}
+}, null, -1)
+const _hoisted_2 = { ref: "grid" }
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)("div", _hoisted_1, null, 512))
+  return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createBlock)(external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.Fragment, null, [
+    _hoisted_1,
+    (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createVNode)("div", _hoisted_2, null, 512)
+  ], 64))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=701f0f51
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=72ab61fc
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __nested_webpack_require_1496686__(803);
@@ -36811,6 +36818,9 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             });
             return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
         };
+        const formatter = (props) => {
+            return String(props.value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        };
         const applyPendingFilters = () => {
             if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}')
                 return;
@@ -36830,7 +36840,10 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                     showApplyBtn: true,
                     showClearBtn: true
                 } : undefined,
-                sortable: header.sortable
+                sortable: header.sortable,
+                align: header.align,
+                width: header.width,
+                formatter
             };
         };
         const updateHeader = async () => {
@@ -36855,7 +36868,8 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                         showApplyBtn: true,
                         showClearBtn: true
                     },
-                    sortable: true
+                    sortable: true,
+                    formatter
                 };
             });
             if (store.gridInstance) {
@@ -36868,6 +36882,7 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => [props.queryId, props.queryUrl]), async () => {
                 if (store.gridInstance)
                     store.gridInstance.destroy();
+                await updateHeader();
                 store.gridInstance = new (tui_grid_default())({
                     el: grid.value,
                     scrollX: !!props.options.scrollX,
@@ -36879,7 +36894,7 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                     copyOptions: {
                         customValue: value => {
                             const e = document.createElement('div');
-                            e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
+                            e.innerHTML = typeof value === 'string' ? value : value?.toString().trim() || '';
                             return e.childNodes[0]?.nodeValue || '';
                         }
                     },
@@ -36974,6 +36989,9 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                     return;
                 }
                 return store.gridInstance.unfilter(columnName);
+            },
+            reloadData: () => {
+                return store.gridInstance?.reloadData();
             }
         };
         return {
@@ -53637,7 +53655,9 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
         }).map(function (e) {
           return {
             target: e.shift(),
-            name: e.shift()
+            name: e.shift(),
+            align: 'center',
+            width: e.shift()
           };
         });
       }
@@ -53678,8 +53698,16 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
     }, {
       immediate: true
     });
+
+    var reloadData = function reloadData() {
+      var _dt$value;
+
+      return (_dt$value = dt.value) === null || _dt$value === void 0 ? void 0 : _dt$value.reloadData();
+    };
+
     return _objectSpread(_objectSpread({}, (0,vue__WEBPACK_IMPORTED_MODULE_0__.toRefs)(state)), {}, {
-      dt: dt
+      dt: dt,
+      reloadData: reloadData
     });
   }
 }));
@@ -53754,8 +53782,12 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     ref: "dt"
   }, null, 8
   /* PROPS */
-  , ["queryId", "parameters", "headers"])], 2112
-  /* STABLE_FRAGMENT, DEV_ROOT_FRAGMENT */
+  , ["queryId", "parameters", "headers"]), (0,vue__WEBPACK_IMPORTED_MODULE_0__.createVNode)("button", {
+    onClick: _cache[3] || (_cache[3] = function () {
+      return _ctx.reloadData && _ctx.reloadData.apply(_ctx, arguments);
+    })
+  }, "reloadData")], 64
+  /* STABLE_FRAGMENT */
   );
 }
 

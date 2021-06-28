@@ -1,4 +1,5 @@
 <template>
+    <span class="tui-grid-cell" style="display: none; font-family: Arial, '\B3CB\C6C0', Dotum, sans-serif; font-size: 13px; font-weight: 400;"></span>
     <div ref="grid"></div>
 </template>
 
@@ -8,6 +9,7 @@ import Grid, { Params } from 'tui-grid';
 import { FilterState, NumberFilterCode, TextFilterCode } from 'tui-grid/types/store/filterLayerState';
 import { OptColumn } from 'tui-grid/types/options';
 import { ApiDataResponse, HeaderProp, Options, Parameters } from './types';
+import { FormatterProps } from 'tui-grid/types/store/column';
 
 export default defineComponent({
     props: {
@@ -54,6 +56,10 @@ export default defineComponent({
             return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
         }
 
+        const formatter = (props: FormatterProps) => {
+            return String(props.value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         const applyPendingFilters = () => {
             if(!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') return;
             if(store.pendingFilters.length) {
@@ -73,7 +79,10 @@ export default defineComponent({
                     showApplyBtn: true,
                     showClearBtn: true
                 } : undefined,
-                sortable: header.sortable
+                sortable: header.sortable,
+                align: header.align,
+                width: header.width,
+                formatter
             }
         }
 
@@ -98,7 +107,8 @@ export default defineComponent({
                         showApplyBtn: true,
                         showClearBtn: true
                     },
-                    sortable: true
+                    sortable: true,
+                    formatter
                 }
             });
             if(store.gridInstance) {
@@ -111,6 +121,7 @@ export default defineComponent({
             Grid.applyTheme('striped');
             watch(computed(() => [ props.queryId, props.queryUrl ]), async () => {
                 if(store.gridInstance) store.gridInstance.destroy();
+                await updateHeader();
                 store.gridInstance = new Grid({
                     el: grid.value!,
                     scrollX: !!props.options.scrollX,
@@ -122,7 +133,7 @@ export default defineComponent({
                     copyOptions: {
                         customValue: value => {
                             const e = document.createElement('div');
-                            e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
+                            e.innerHTML = typeof value === 'string' ? value : value?.toString().trim() || '';
                             return e.childNodes[0]?.nodeValue || '';
                         }
                     },
@@ -217,6 +228,9 @@ export default defineComponent({
                     return;
                 }
                 return store.gridInstance.unfilter(columnName);
+            },
+            reloadData: () => {
+                return store.gridInstance?.reloadData();
             }
         };
 

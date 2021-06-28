@@ -36761,15 +36761,22 @@ if (typeof window !== 'undefined') {
 
 // EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__(507);
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=701f0f51
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=72ab61fc
 
 
-const _hoisted_1 = { ref: "grid" }
+const _hoisted_1 = /*#__PURE__*/(0,external_commonjs_vue_commonjs2_vue_root_Vue_.createVNode)("span", {
+  class: "tui-grid-cell",
+  style: {"display":"none","font-family":"Arial, '\\B3CB\\C6C0', Dotum, sans-serif","font-size":"13px","font-weight":"400"}
+}, null, -1)
+const _hoisted_2 = { ref: "grid" }
 
 function render(_ctx, _cache, $props, $setup, $data, $options) {
-  return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_.createBlock)("div", _hoisted_1, null, 512))
+  return ((0,external_commonjs_vue_commonjs2_vue_root_Vue_.openBlock)(), (0,external_commonjs_vue_commonjs2_vue_root_Vue_.createBlock)(external_commonjs_vue_commonjs2_vue_root_Vue_.Fragment, null, [
+    _hoisted_1,
+    (0,external_commonjs_vue_commonjs2_vue_root_Vue_.createVNode)("div", _hoisted_2, null, 512)
+  ], 64))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=701f0f51
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=72ab61fc
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36820,6 +36827,9 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
             });
             return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
         };
+        const formatter = (props) => {
+            return String(props.value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        };
         const applyPendingFilters = () => {
             if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}')
                 return;
@@ -36839,7 +36849,10 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                     showApplyBtn: true,
                     showClearBtn: true
                 } : undefined,
-                sortable: header.sortable
+                sortable: header.sortable,
+                align: header.align,
+                width: header.width,
+                formatter
             };
         };
         const updateHeader = async () => {
@@ -36864,7 +36877,8 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                         showApplyBtn: true,
                         showClearBtn: true
                     },
-                    sortable: true
+                    sortable: true,
+                    formatter
                 };
             });
             if (store.gridInstance) {
@@ -36877,6 +36891,7 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
             (0,external_commonjs_vue_commonjs2_vue_root_Vue_.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_.computed)(() => [props.queryId, props.queryUrl]), async () => {
                 if (store.gridInstance)
                     store.gridInstance.destroy();
+                await updateHeader();
                 store.gridInstance = new (tui_grid_default())({
                     el: grid.value,
                     scrollX: !!props.options.scrollX,
@@ -36888,7 +36903,7 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                     copyOptions: {
                         customValue: value => {
                             const e = document.createElement('div');
-                            e.innerHTML = typeof value === 'string' ? value : value?.toString() || '';
+                            e.innerHTML = typeof value === 'string' ? value : value?.toString().trim() || '';
                             return e.childNodes[0]?.nodeValue || '';
                         }
                     },
@@ -36983,6 +36998,9 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                     return;
                 }
                 return store.gridInstance.unfilter(columnName);
+            },
+            reloadData: () => {
+                return store.gridInstance?.reloadData();
             }
         };
         return {

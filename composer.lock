@@ -2321,7 +2321,7 @@
             "dist": {
                 "type": "path",
                 "url": "./packages/sv-dt-laravel",
-                "reference": "c786717dc3b081d04a242989a2146e70cdff730c"
+                "reference": "0a6f92986034ee2a9db91ce2c8006208ab9e6a62"
             },
             "type": "library",
             "extra": {

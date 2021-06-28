@@ -1,6 +1,7 @@
 <template>
 	<!-- <router-view /> -->
 	<sv-data-table :queryId="queryId" :options="{ scrollX: false }" v-model:parameters="params" v-model:headers="headers" ref="dt" />
+    <button @click="reloadData">reloadData</button>
 </template>
 
 <script lang="ts">
@@ -13,51 +14,57 @@ interface KeyValueObject {
 }
 
 export default defineComponent({
-		setup() {
-			const state = reactive({
-                queryId: 1,
-                params: {} as KeyValueObject,
-                headers: [] as { name?: string; }[]
-			});
+    setup() {
+        const state = reactive({
+            queryId: 1,
+            params: {} as KeyValueObject,
+            headers: [] as { name?: string; }[]
+        });
 
-			const dt = ref<ComponentPublicInstance<SvDataTable>>();
+        const dt = ref<ComponentPublicInstance<SvDataTable>>();
 
-			watch(computed(() => window.location.search), () => {
-				if(!window.location.search.length) return state.params = reactive({});
-				const params = window.location.search.substr(1).split('&').map(e => e.split('=')).reduce((o, v) => {
-					o[v.shift()!] = v.join('=');
-					return o;
-				}, {} as KeyValueObject);
-				state.queryId = Number(params.queryId!);
-				delete params.queryId;
-				if(params.headers) {
-					state.headers = (params.headers! as string).split(',').map(e => e.trim()).map(decodeURI).map(e => e.split(';')).map(e => {
-						return {
-							target: e.shift()!,
-							name: e.shift(),
-						};
-					});
-				}
-				delete params.headers;
-				if(params.filters) {
-					const { filters } = params;
+        watch(computed(() => window.location.search), () => {
+            if(!window.location.search.length) return state.params = reactive({});
+            const params = window.location.search.substr(1).split('&').map(e => e.split('=')).reduce((o, v) => {
+                o[v.shift()!] = v.join('=');
+                return o;
+            }, {} as KeyValueObject);
+            state.queryId = Number(params.queryId!);
+            delete params.queryId;
+            if(params.headers) {
+                state.headers = (params.headers! as string).split(',').map(e => e.trim()).map(decodeURI).map(e => e.split(';')).map(e => {
+                    return {
+                        target: e.shift()!,
+                        name: e.shift(),
+                        align: 'center',
+                        width: e.shift()
+                    };
+                });
+            }
+            delete params.headers;
+            if(params.filters) {
+                const { filters } = params;
 
-					onMounted(() => {
-						watch(computed(() => dt.value), () => {
-							(filters as string).split(';').map(e => e.trim()).map(decodeURI).map(e => e.split('+')).forEach(e => {
-								if(!dt.value) return;
-								const [ columnName, code, value ] = e;
-								dt.value.filter(columnName, { code: (code as NumberFilterCode | TextFilterCode), value });
-							});
-						}, { immediate: true });
-					});
-				}
-				delete params.filters;
-				state.params = reactive(params);
-			}, { immediate: true });
+                onMounted(() => {
+                    watch(computed(() => dt.value), () => {
+                        (filters as string).split(';').map(e => e.trim()).map(decodeURI).map(e => e.split('+')).forEach(e => {
+                            if(!dt.value) return;
+                            const [ columnName, code, value ] = e;
+                            dt.value.filter(columnName, { code: (code as NumberFilterCode | TextFilterCode), value });
+                        });
+                    }, { immediate: true });
+                });
+            }
+            delete params.filters;
+            state.params = reactive(params);
+        }, { immediate: true });
 
-			return { ...toRefs(state), dt };
-		}
+        const reloadData = () => {
+            return dt.value?.reloadData();
+        }
+
+        return { ...toRefs(state), dt, reloadData };
+    }
 });
 </script>
 
@@ -107,5 +114,9 @@ html, body {
 h1, h2, h3, h4, h5 {
 	margin-top: 0;
 }
+
+// th {
+//     font-weight: 100;
+// }
 </style>
 
