@@ -37,7 +37,8 @@ export default defineComponent({
                         target: e.shift()!,
                         name: e.shift(),
                         align: 'center',
-                        width: e.shift()
+                        width: e.shift(),
+                        formatter: e.shift()
                     };
                 });
             }
