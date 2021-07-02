@@ -14,7 +14,8 @@ export interface HeaderProp {
     target: string;
     filterAs?: 'text' | 'number';
     sortable?: boolean;
-    width: number | 'auto';
+    width?: number | 'auto';
+    formatter?: 'number';
 }
 
 export interface KeyValueObject {

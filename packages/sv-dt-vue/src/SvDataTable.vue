@@ -27,7 +27,7 @@ export default defineComponent({
             default: {
                 scrollX: false,
                 scrollY: false,
-                perPage: 50
+                perPage: 15
             }
         },
         parameters: {
@@ -56,8 +56,22 @@ export default defineComponent({
             return Object.keys(params).map(e => `${encodeURIComponent(e)}=${encodeURIComponent((params[e] === null || params[e] === undefined) ? '' : params[e])}`).join('&');
         }
 
-        const formatter = (props: FormatterProps) => {
-            return String(props.value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const formatter = (type?: HeaderProp['formatter']) => {
+            return (props: FormatterProps) => {
+                let { value } = props;
+                if(value === undefined || value === null) return '';
+                switch(type) {
+                    case 'number': {
+                        switch(typeof value) {
+                            case 'object': value = value ? 1 : 0; break;
+                            case 'boolean': value = value ? 1 : 0; break;
+                            case 'string': value = Number(value.replace(/[^0-9.]/g, '')); break;
+                        }
+                        value = Intl.NumberFormat('en-US').format(value);
+                    } break;
+                }
+                return String(value || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
         }
 
         const applyPendingFilters = () => {
@@ -82,7 +96,7 @@ export default defineComponent({
                 sortable: header.sortable,
                 align: header.align,
                 width: header.width,
-                formatter
+                formatter: formatter(header.formatter)
             }
         }
 
@@ -108,7 +122,7 @@ export default defineComponent({
                         showClearBtn: true
                     },
                     sortable: true,
-                    formatter
+                    formatter: formatter()
                 }
             });
             if(store.gridInstance) {
