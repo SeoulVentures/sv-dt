@@ -36752,7 +36752,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = __webpack_require__(/*! vue */ "./node_modules/vue/dist/vue.esm-bundler.js");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=5f355252
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=afa00c30
 
 
 const _hoisted_1 = /*#__PURE__*/(0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createVNode)("span", {
@@ -36767,7 +36767,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createVNode)("div", _hoisted_2, null, 512)
   ], 64))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=5f355252
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=afa00c30
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __nested_webpack_require_1496686__(803);
@@ -36834,7 +36834,7 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                                     value = value ? 1 : 0;
                                     break;
                                 case 'string':
-                                    value = Number(value.replace(/\D/g, ''));
+                                    value = Number(value.replace(/[^0-9.]/g, ''));
                                     break;
                             }
                             value = Intl.NumberFormat('en-US').format(value);
@@ -36858,11 +36858,6 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
             return {
                 name: header.target,
                 header: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                filter: header.filterAs ? {
-                    type: header.filterAs,
-                    showApplyBtn: true,
-                    showClearBtn: true
-                } : undefined,
                 sortable: header.sortable,
                 align: header.align,
                 width: header.width,
@@ -36886,11 +36881,6 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                 return {
                     name: e,
                     header: e.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                    filter: {
-                        type: typeof row[e] === 'number' ? 'number' : 'text',
-                        showApplyBtn: true,
-                        showClearBtn: true
-                    },
                     sortable: true,
                     formatter: formatter()
                 };
@@ -36944,37 +36934,35 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
                 }
             });
             store.gridInstance.on('beforeSort', (_ev, { columns } = store.gridInstance.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
-            store.gridInstance.on('filter', (ev) => {
-                const filters = ev.filterState?.map(e => {
-                    const { columnName, state } = e;
-                    return {
-                        name: columnName,
-                        code: `${state[0].code}`,
-                        value: `${state[0].value}`
-                    };
-                }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {});
-                if (!filters)
-                    return;
-                if (JSON.stringify(store.filters) === JSON.stringify(filters))
-                    return;
-                store.filters = filters;
-                store.gridInstance.resetData([]);
-                store.gridInstance.readData(1);
-                document.querySelectorAll('.tui-grid-filter-btn-clear').forEach(e => e.addEventListener('click', () => {
-                    store.filters = {};
-                    const { data, filterLayerState } = store.gridInstance.store;
-                    filterLayerState.activeFilterState = null;
-                    filterLayerState.activeColumnAddress = null;
-                    data.filters = null;
-                    store.gridInstance.resetData([]);
-                    store.gridInstance.readData(1);
-                }));
-                document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
-                    if (e.parentElement?.parentElement?.querySelector('input')?.value.length === 0) { // Element exists & value length 0
-                        e.parentElement?.querySelector('.tui-grid-filter-btn-clear')?.dispatchEvent(new Event('click'));
-                    }
-                }));
-            });
+            // store.gridInstance.on('filter', (ev) => {
+            //     const filters = ev.filterState?.map(e => {
+            //         const { columnName, state } = e;
+            //         return {
+            //             name: columnName,
+            //             code: `${state[0].code}` as NumberFilterCode | TextFilterCode,
+            //             value: `${state[0].value}`
+            //         };
+            //     }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {} as typeof store.filters);
+            //     if(!filters) return;
+            //     if(JSON.stringify(store.filters) === JSON.stringify(filters)) return;
+            //     store.filters = filters;
+            //     store.gridInstance!.resetData([]);
+            //     store.gridInstance!.readData(1);
+            //     document.querySelectorAll('.tui-grid-filter-btn-clear').forEach(e => e.addEventListener('click', () => {
+            //         store.filters = {};
+            //         const { data, filterLayerState } = store.gridInstance!.store;
+            //         filterLayerState.activeFilterState = null;
+            //         filterLayerState.activeColumnAddress = null;
+            //         data.filters = null;
+            //         store.gridInstance!.resetData([]);
+            //         store.gridInstance!.readData(1);
+            //     }));
+            //     document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
+            //         if(e.parentElement?.parentElement?.querySelector('input')?.value.length === 0) { // Element exists & value length 0
+            //             e.parentElement?.querySelector('.tui-grid-filter-btn-clear')?.dispatchEvent(new Event('click'));
+            //         }
+            //     }));
+            // });
         });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.computed)(() => JSON.stringify(props.parameters)), async () => {
             if (!store.gridInstance)
@@ -36998,20 +36986,28 @@ var tui_grid_default = /*#__PURE__*/__nested_webpack_require_1496686__.n(tui_gri
         });
         const methods = {
             filter: (columnName, state) => {
-                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
-                    store.pendingFilters.push([columnName, [state]]);
-                    return;
-                }
-                return store.gridInstance.filter(columnName, [state]);
+                // if(!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
+                //     store.pendingFilters.push([ columnName, [ state ] ]);
+                //     return;
+                // }
+                // return store.gridInstance.filter(columnName, [ state ]);
+                return store.filters[columnName] = state;
             },
             unfilter: (columnName) => {
-                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
-                    if (columnName === undefined)
-                        store.pendingFilters = [];
-                    store.pendingFilters = store.pendingFilters.filter(([name]) => name !== columnName);
+                // if(!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
+                //     if(columnName === undefined) store.pendingFilters = [];
+                //     store.pendingFilters = store.pendingFilters.filter(([ name ]) => name !== columnName);
+                //     return;
+                // }
+                // return store.gridInstance.unfilter(columnName);
+                if (columnName) {
+                    delete store.filters[columnName];
                     return;
                 }
-                return store.gridInstance.unfilter(columnName);
+                else {
+                    store.filters = {};
+                    return;
+                }
             },
             reloadData: () => {
                 return store.gridInstance?.reloadData();

@@ -12,7 +12,6 @@ export interface HeaderProp {
     name?: string;
     align?: 'left' | 'center' | 'right';
     target: string;
-    filterAs?: 'text' | 'number';
     sortable?: boolean;
     width?: number | 'auto';
     formatter?: 'number';

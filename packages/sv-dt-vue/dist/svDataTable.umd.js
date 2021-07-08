@@ -36761,7 +36761,7 @@ if (typeof window !== 'undefined') {
 
 // EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__(507);
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=51e46554
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=35a4c085
 
 
 const _hoisted_1 = /*#__PURE__*/(0,external_commonjs_vue_commonjs2_vue_root_Vue_.createVNode)("span", {
@@ -36776,7 +36776,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     (0,external_commonjs_vue_commonjs2_vue_root_Vue_.createVNode)("div", _hoisted_2, null, 512)
   ], 64))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=51e46554
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=35a4c085
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36867,11 +36867,6 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
             return {
                 name: header.target,
                 header: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                filter: header.filterAs ? {
-                    type: header.filterAs,
-                    showApplyBtn: true,
-                    showClearBtn: true
-                } : undefined,
                 sortable: header.sortable,
                 align: header.align,
                 width: header.width,
@@ -36895,11 +36890,6 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                 return {
                     name: e,
                     header: e.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                    filter: {
-                        type: typeof row[e] === 'number' ? 'number' : 'text',
-                        showApplyBtn: true,
-                        showClearBtn: true
-                    },
                     sortable: true,
                     formatter: formatter()
                 };
@@ -36942,57 +36932,17 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
             }, { immediate: true });
             applyPendingFilters();
         });
-        // watch(computed(() => props.queryId), updateHeader, { immediate: true });
+        (0,external_commonjs_vue_commonjs2_vue_root_Vue_.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_.computed)(() => props.queryId), updateHeader, { immediate: true });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_.computed)(() => store.gridInstance), async () => {
             if (!store.gridInstance)
                 return;
             await updateHeader();
-            store.gridInstance.on('onGridUpdated', (_ev) => {
-                for (const [key, value] of Object.entries(store.filters)) {
-                    store.gridInstance.filter(key, [value]);
-                }
-            });
             store.gridInstance.on('beforeSort', (_ev, { columns } = store.gridInstance.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
-            store.gridInstance.on('filter', (ev) => {
-                const filters = ev.filterState?.map(e => {
-                    const { columnName, state } = e;
-                    return {
-                        name: columnName,
-                        code: `${state[0].code}`,
-                        value: `${state[0].value}`
-                    };
-                }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {});
-                if (!filters)
-                    return;
-                if (JSON.stringify(store.filters) === JSON.stringify(filters))
-                    return;
-                store.filters = filters;
-                store.gridInstance.resetData([]);
-                store.gridInstance.readData(1);
-                document.querySelectorAll('.tui-grid-filter-btn-clear').forEach(e => e.addEventListener('click', () => {
-                    store.filters = {};
-                    const { data, filterLayerState } = store.gridInstance.store;
-                    filterLayerState.activeFilterState = null;
-                    filterLayerState.activeColumnAddress = null;
-                    data.filters = null;
-                    store.gridInstance.resetData([]);
-                    store.gridInstance.readData(1);
-                }));
-                document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
-                    if (e.parentElement?.parentElement?.querySelector('input')?.value.length === 0) { // Element exists & value length 0
-                        e.parentElement?.querySelector('.tui-grid-filter-btn-clear')?.dispatchEvent(new Event('click'));
-                    }
-                }));
-            });
         });
         (0,external_commonjs_vue_commonjs2_vue_root_Vue_.watch)((0,external_commonjs_vue_commonjs2_vue_root_Vue_.computed)(() => JSON.stringify(props.parameters)), async () => {
             if (!store.gridInstance)
                 return;
             store.filters = {};
-            const { data, filterLayerState } = store.gridInstance.store;
-            filterLayerState.activeFilterState = null;
-            filterLayerState.activeColumnAddress = null;
-            data.filters = null;
             await updateHeader();
             store.gridInstance.resetData([]);
             store.gridInstance.readData(1);
@@ -37007,23 +36957,22 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
         });
         const methods = {
             filter: (columnName, state) => {
-                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
-                    store.pendingFilters.push([columnName, [state]]);
-                    return;
-                }
-                return store.gridInstance.filter(columnName, [state]);
+                store.filters[columnName] = state;
+                return;
             },
             unfilter: (columnName) => {
-                if (!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
-                    if (columnName === undefined)
-                        store.pendingFilters = [];
-                    store.pendingFilters = store.pendingFilters.filter(([name]) => name !== columnName);
+                if (columnName) {
+                    delete store.filters[columnName];
                     return;
                 }
-                return store.gridInstance.unfilter(columnName);
+                else {
+                    store.filters = {};
+                    return;
+                }
             },
             reloadData: () => {
-                return store.gridInstance?.reloadData();
+                store.gridInstance?.reloadData();
+                return;
             }
         };
         return {

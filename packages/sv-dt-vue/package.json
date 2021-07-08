@@ -1,6 +1,6 @@
 {
   "name": "@seoulventures/sv-dt",
-  "version": "0.0.46",
+  "version": "0.0.48",
   "main": "dist/svDataTable.common.js",
   "types": "src/index.d.ts",
   "scripts": {

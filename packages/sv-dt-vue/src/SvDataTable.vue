@@ -88,11 +88,6 @@ export default defineComponent({
             return {
                 name: header.target,
                 header: header.name ?? header.target.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                filter: header.filterAs ? {
-                    type: header.filterAs,
-                    showApplyBtn: true,
-                    showClearBtn: true
-                } : undefined,
                 sortable: header.sortable,
                 align: header.align,
                 width: header.width,
@@ -116,11 +111,6 @@ export default defineComponent({
                 return {
                     name: e,
                     header: e.split('_').map(e => `${e.charAt(0).toUpperCase()}${e.slice(1)}`).join(' '),
-                    filter: {
-                        type: typeof row[e] === 'number' ? 'number' : 'text',
-                        showApplyBtn: true,
-                        showClearBtn: true
-                    },
                     sortable: true,
                     formatter: formatter()
                 }
@@ -164,57 +154,17 @@ export default defineComponent({
             applyPendingFilters();
         });
 
-        // watch(computed(() => props.queryId), updateHeader, { immediate: true });
+        watch(computed(() => props.queryId), updateHeader, { immediate: true });
 
         watch(computed(() => store.gridInstance), async () => {
             if(!store.gridInstance) return;
             await updateHeader();
-            store.gridInstance.on('onGridUpdated', (_ev) => {
-                for(const [ key, value ] of Object.entries(store.filters)) {
-                    store.gridInstance!.filter(key, [ value ]);
-                }
-            });
-
             store.gridInstance.on('beforeSort', (_ev, { columns } = store.gridInstance!.store.data.sortState) => columns.length && columns.shift()); // Issue #1379
-
-            store.gridInstance.on('filter', (ev) => {
-                const filters = ev.filterState?.map(e => {
-                    const { columnName, state } = e;
-                    return {
-                        name: columnName,
-                        code: `${state[0].code}` as NumberFilterCode | TextFilterCode,
-                        value: `${state[0].value}`
-                    };
-                }).reduce((o, v) => (o[v.name] = { value: v.value, code: v.code }, o), {} as typeof store.filters);
-                if(!filters) return;
-                if(JSON.stringify(store.filters) === JSON.stringify(filters)) return;
-                store.filters = filters;
-                store.gridInstance!.resetData([]);
-                store.gridInstance!.readData(1);
-                document.querySelectorAll('.tui-grid-filter-btn-clear').forEach(e => e.addEventListener('click', () => {
-                    store.filters = {};
-                    const { data, filterLayerState } = store.gridInstance!.store;
-                    filterLayerState.activeFilterState = null;
-                    filterLayerState.activeColumnAddress = null;
-                    data.filters = null;
-                    store.gridInstance!.resetData([]);
-                    store.gridInstance!.readData(1);
-                }));
-                document.querySelectorAll('.tui-grid-filter-btn-apply').forEach(e => e.addEventListener('click', () => {
-                    if(e.parentElement?.parentElement?.querySelector('input')?.value.length === 0) { // Element exists & value length 0
-                        e.parentElement?.querySelector('.tui-grid-filter-btn-clear')?.dispatchEvent(new Event('click'));
-                    }
-                }));
-            });
         });
 
         watch(computed(() => JSON.stringify(props.parameters)), async () => {
             if(!store.gridInstance) return;
             store.filters = {};
-            const { data, filterLayerState } = store.gridInstance.store;
-            filterLayerState.activeFilterState = null;
-            filterLayerState.activeColumnAddress = null;
-            data.filters = null;
             await updateHeader();
             store.gridInstance.resetData([]);
             store.gridInstance.readData(1);
@@ -229,22 +179,21 @@ export default defineComponent({
 
         const methods = {
             filter: (columnName: string, state: FilterState) => {
-                if(!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
-                    store.pendingFilters.push([ columnName, [ state ] ]);
-                    return;
-                }
-                return store.gridInstance.filter(columnName, [ state ]);
+                store.filters[columnName] = state as typeof store['filters'][typeof columnName];
+                return;
             },
             unfilter: (columnName?: string) => {
-                if(!store.gridInstance || !store.headers.length || JSON.stringify(store.gridInstance.store.column.allColumnMap) === '{}') {
-                    if(columnName === undefined) store.pendingFilters = [];
-                    store.pendingFilters = store.pendingFilters.filter(([ name ]) => name !== columnName);
+                if(columnName) {
+                    delete store.filters[columnName];
+                    return;
+                } else {
+                    store.filters = {};
                     return;
                 }
-                return store.gridInstance.unfilter(columnName);
             },
             reloadData: () => {
-                return store.gridInstance?.reloadData();
+                store.gridInstance?.reloadData();
+                return;
             }
         };
 
