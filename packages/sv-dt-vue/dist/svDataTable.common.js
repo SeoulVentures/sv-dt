@@ -36743,7 +36743,7 @@ if (typeof window !== 'undefined') {
 
 ;// CONCATENATED MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 const external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject = require("vue");;
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=35a4c085
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=47ef145c
 
 
 const _hoisted_1 = /*#__PURE__*/(0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createVNode)("span", {
@@ -36758,7 +36758,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     (0,external_commonjs_vue_commonjs2_vue_root_Vue_namespaceObject.createVNode)("div", _hoisted_2, null, 512)
   ], 64))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=35a4c085
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=47ef145c
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36852,7 +36852,8 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                 sortable: header.sortable,
                 align: header.align,
                 width: header.width,
-                formatter: formatter(header.formatter)
+                formatter: formatter(header.formatter),
+                renderer: header.renderer
             };
         };
         const updateHeader = async () => {
