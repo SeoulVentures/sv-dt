@@ -13,12 +13,63 @@ interface KeyValueObject {
 		[key: string]: string | number | undefined;
 }
 
+class CustomSliderRenderer {
+    el;
+    constructor(props: any) {
+        const el = document.createElement('button');
+        el.innerText = props.value;
+        el.addEventListener('click', function() {
+            alert(props.value);
+        });
+
+        this.el = el;
+        this.render(props);
+    }
+
+    getElement() {
+        return this.el;
+    }
+
+    render(props: any) {
+        this.el.value = String(props.value);
+    }
+}
+
 export default defineComponent({
     setup() {
         const state = reactive({
             queryId: 1,
             params: {} as KeyValueObject,
-            headers: [] as { name?: string; }[]
+            headers: [
+                {
+                    name: '날짜',
+                    target: 'created_at',
+                },
+                {
+                    name: '주문번호',
+                    target: 'id',
+                },
+                {
+                    name: '충전금액',
+                    target: 'amount',
+                    align: 'right',
+                    formatter: 'number',
+                },
+                {
+                    name: 'VAT',
+                    target: 'tax',
+                    align: 'right',
+                    formatter: 'number',
+                },
+                {
+                    name: '결제금액',
+                    target: 'total',
+                    align: 'right',
+                    renderer: {
+                        type: CustomSliderRenderer,
+                    }
+                }
+            ] as { name?: string; target: string; }[]
         });
 
         const dt = ref<ComponentPublicInstance<SvDataTable>>();
