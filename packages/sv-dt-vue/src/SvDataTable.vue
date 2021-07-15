@@ -91,7 +91,8 @@ export default defineComponent({
                 sortable: header.sortable,
                 align: header.align,
                 width: header.width,
-                formatter: formatter(header.formatter)
+                formatter: formatter(header.formatter),
+                renderer: header.renderer
             }
         }
 

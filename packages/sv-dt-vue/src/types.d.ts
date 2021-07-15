@@ -1,3 +1,5 @@
+import {OptCellRenderer} from "tui-grid/types/options";
+
 export interface Options {
     scrollX: boolean;
     scrollY: boolean;
@@ -15,6 +17,7 @@ export interface HeaderProp {
     sortable?: boolean;
     width?: number | 'auto';
     formatter?: 'number';
+    renderer?: OptCellRenderer;
 }
 
 export interface KeyValueObject {
