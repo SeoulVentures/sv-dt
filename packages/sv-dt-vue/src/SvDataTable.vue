@@ -65,7 +65,7 @@ export default defineComponent({
                         switch(typeof value) {
                             case 'object': value = value ? 1 : 0; break;
                             case 'boolean': value = value ? 1 : 0; break;
-                            case 'string': value = Number(value.replace(/[^0-9.]/g, '')); break;
+                            case 'string': value = Number(value.replace(/[^0-9.-]/g, '')); break;
                         }
                         value = Intl.NumberFormat('en-US').format(value);
                     } break;
