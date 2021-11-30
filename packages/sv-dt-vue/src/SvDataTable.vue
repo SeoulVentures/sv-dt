@@ -4,12 +4,14 @@
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, reactive, toRefs, watch, ref, onMounted, ComponentPublicInstance, PropType } from 'vue';
+import { computed, defineComponent, reactive, toRefs, watch, ref, onMounted, ComponentPublicInstance, PropType, h, VNode, DefineComponent, render } from 'vue';
 import Grid, { Params } from 'tui-grid';
 import { FilterState, NumberFilterCode, TextFilterCode } from 'tui-grid/types/store/filterLayerState';
 import { OptColumn } from 'tui-grid/types/options';
-import { ApiDataResponse, HeaderProp, Options, Parameters } from './types';
+import { CellRendererClass } from 'tui-grid/types/renderer';
+import { ApiDataResponse, HeaderComponentProp, HeaderProp, Options, Parameters } from './types';
 import { FormatterProps } from 'tui-grid/types/store/column';
+import { CellRendererProps } from 'tui-grid/types/renderer';
 
 export default defineComponent({
     props: {
@@ -92,7 +94,7 @@ export default defineComponent({
                 align: header.align,
                 width: header.width,
                 formatter: formatter(header.formatter),
-                renderer: header.renderer
+                renderer: header.component ? getRenderVueCompoenent(header.component) : header.renderer
             }
         }
 
@@ -204,6 +206,25 @@ export default defineComponent({
         }
     }
 });
+
+function getRenderVueCompoenent(component: HeaderComponentProp): CellRendererClass {
+    return class RenderVueComponent {
+        private $element: VNode;
+        private $container: HTMLElement;
+
+        constructor(props: CellRendererProps) {
+            const rowData = toRefs(props.grid.store.data.rawData[props.rowKey as number]);
+            const { rowKey, rowSpanKey, sortKey, uniqueKey, rowSpanMap, _attributes, _relationListItemMap, _disabledPriority, _children, _leaf, ...componentProps } = rowData;
+            this.$container = document.createElement('div');
+            this.$element = h(component.value, Object.assign(componentProps, component.attrs));
+            render(this.$element, this.$container);
+        }
+
+        getElement() {
+            return this.$container;
+        }
+    };
+}
 </script>
 
 <style lang="scss">

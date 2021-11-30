@@ -5,71 +5,39 @@
 </template>
 
 <script lang="ts">
-import { ComponentPublicInstance, computed, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
+import { ComponentPublicInstance, computed, createApp, defineComponent, onMounted, reactive, ref, toRefs, watch } from 'vue';
 import { SvDataTable } from '@seoulventures/sv-dt';
 import { NumberFilterCode, TextFilterCode } from 'tui-grid/types/store/filterLayerState';
+import Text from './Text.vue';
 
 interface KeyValueObject {
-		[key: string]: string | number | undefined;
-}
-
-class CustomSliderRenderer {
-    el;
-    constructor(props: any) {
-        const el = document.createElement('button');
-        el.innerText = props.value;
-        el.addEventListener('click', function() {
-            alert(props.value);
-        });
-
-        this.el = el;
-        this.render(props);
-    }
-
-    getElement() {
-        return this.el;
-    }
-
-    render(props: any) {
-        this.el.value = String(props.value);
-    }
+    [key: string]: string | number | undefined;
 }
 
 export default defineComponent({
     setup() {
+        const test = ref(1);
+
         const state = reactive({
-            queryId: 1,
+            queryId: 29,
             params: {} as KeyValueObject,
             headers: [
                 {
                     name: '날짜',
                     target: 'created_at',
-                },
-                {
-                    name: '주문번호',
-                    target: 'id',
-                },
-                {
-                    name: '충전금액',
-                    target: 'amount',
-                    align: 'right',
-                    formatter: 'number',
-                },
-                {
-                    name: 'VAT',
-                    target: 'tax',
-                    align: 'right',
-                    formatter: 'number',
-                },
-                {
-                    name: '결제금액',
-                    target: 'total',
-                    align: 'right',
-                    renderer: {
-                        type: CustomSliderRenderer,
+                    component: {
+                        value: Text,
+                        attrs: {
+                            id: test,
+                            onClick: () => alert(test.value++)
+                        }
                     }
+                },
+                {
+                    name: '쿼리',
+                    target: 'query',
                 }
-            ] as { name?: string; target: string; }[]
+            ]
         });
 
         const dt = ref<ComponentPublicInstance<SvDataTable>>();
@@ -91,7 +59,7 @@ export default defineComponent({
                         width: e.shift(),
                         formatter: e.shift()
                     };
-                });
+                }) as unknown as any;
             }
             delete params.headers;
             if(params.filters) {
@@ -171,4 +139,3 @@ h1, h2, h3, h4, h5 {
 //     font-weight: 100;
 // }
 </style>
-

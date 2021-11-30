@@ -36761,7 +36761,7 @@ if (typeof window !== 'undefined') {
 
 // EXTERNAL MODULE: external {"commonjs":"vue","commonjs2":"vue","root":"Vue"}
 var external_commonjs_vue_commonjs2_vue_root_Vue_ = __webpack_require__(507);
-;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=55cfccf7
+;// CONCATENATED MODULE: ./node_modules/vue-loader/dist/templateLoader.js??ruleSet[1].rules[2]!./node_modules/cache-loader/dist/cjs.js??ruleSet[0].use[0]!./node_modules/vue-loader/dist/index.js??ruleSet[0].use[1]!./src/SvDataTable.vue?vue&type=template&id=73d61543
 
 
 const _hoisted_1 = /*#__PURE__*/(0,external_commonjs_vue_commonjs2_vue_root_Vue_.createVNode)("span", {
@@ -36776,7 +36776,7 @@ function render(_ctx, _cache, $props, $setup, $data, $options) {
     (0,external_commonjs_vue_commonjs2_vue_root_Vue_.createVNode)("div", _hoisted_2, null, 512)
   ], 64))
 }
-;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=55cfccf7
+;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=template&id=73d61543
 
 // EXTERNAL MODULE: ./node_modules/tui-grid/dist/tui-grid.js
 var tui_grid = __webpack_require__(803);
@@ -36871,7 +36871,7 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
                 align: header.align,
                 width: header.width,
                 formatter: formatter(header.formatter),
-                renderer: header.renderer
+                renderer: header.component ? getRenderVueCompoenent(header.component) : header.renderer
             };
         };
         const updateHeader = async () => {
@@ -36982,6 +36982,22 @@ var tui_grid_default = /*#__PURE__*/__webpack_require__.n(tui_grid);
         };
     }
 }));
+function getRenderVueCompoenent(component) {
+    return class RenderVueComponent {
+        $element;
+        $container;
+        constructor(props) {
+            const rowData = (0,external_commonjs_vue_commonjs2_vue_root_Vue_.toRefs)(props.grid.store.data.rawData[props.rowKey]);
+            const { rowKey, rowSpanKey, sortKey, uniqueKey, rowSpanMap, _attributes, _relationListItemMap, _disabledPriority, _children, _leaf, ...componentProps } = rowData;
+            this.$container = document.createElement('div');
+            this.$element = (0,external_commonjs_vue_commonjs2_vue_root_Vue_.h)(component.value, Object.assign(componentProps, component.attrs));
+            (0,external_commonjs_vue_commonjs2_vue_root_Vue_.render)(this.$element, this.$container);
+        }
+        getElement() {
+            return this.$container;
+        }
+    };
+}
 
 ;// CONCATENATED MODULE: ./src/SvDataTable.vue?vue&type=script&lang=ts
  

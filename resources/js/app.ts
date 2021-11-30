@@ -10,6 +10,8 @@ import SvDataTable from '@seoulventures/sv-dt';
 
 const app = createApp(App);
 
+app.config.performance = true;
+
 // app.component('grid', Grid);
 app.component('sv-data-table', SvDataTable);
 

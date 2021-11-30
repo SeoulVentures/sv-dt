@@ -23,11 +23,11 @@
         "vue-loader": "^16.2.0"
     },
     "dependencies": {
-        "@seoulventures/sv-dt": "^0.0.50",
+        "@seoulventures/sv-dt": "^0.0.56",
         "@toast-ui/vue-grid": "^4.17.3",
         "ag-grid-community": "^25.3.0",
         "ag-grid-vue3": "^25.3.0",
-        "node-sass": "^6.0.0",
+        "node-sass": "^6.0.1",
         "sass-loader": "^12.0.0",
         "tui-grid": "^4.17.3",
         "tui-pagination": "^3.4.0",

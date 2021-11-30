@@ -1,4 +1,5 @@
-import {OptCellRenderer} from "tui-grid/types/options";
+import { DefineComponent } from "@vue/runtime-core";
+import { OptCellRenderer } from "tui-grid/types/options";
 
 export interface Options {
     scrollX: boolean;
@@ -18,6 +19,12 @@ export interface HeaderProp {
     width?: number | 'auto';
     formatter?: 'number';
     renderer?: OptCellRenderer;
+    component?: HeaderComponentProp
+}
+
+export interface HeaderComponentProp {
+    value: DefineComponent<{}, {}, any>;
+    attrs: { [key: string]: any; }
 }
 
 export interface KeyValueObject {
